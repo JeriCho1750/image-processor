@@ -2,7 +2,6 @@
 
 A user-friendly GUI application for batch image processing with resizing and WebP conversion capabilities.
 
-![Screenshot from 2025-06-04 11-21-10.png](../../Screenshot%20from%202025-06-04%2011-21-10.png)
 
 ## Features
 
