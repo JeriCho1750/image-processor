@@ -24,8 +24,8 @@ class ImageProcessor:
     def __init__(self, root):
         self.root = root
         self.root.title("Image Processor - Batch Resize & Convert to WebP")
-        self.root.geometry("900x750")
-        self.root.minsize(800, 600)
+        self.root.geometry("1100x700")
+        self.root.minsize(900, 600)
 
         # Variables
         self.input_files = []
@@ -56,10 +56,37 @@ class ImageProcessor:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
 
+        # Create left and right panels
+        left_frame = ttk.Frame(main_frame)
+        left_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 5))
+
+        right_frame = ttk.Frame(main_frame)
+        right_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(5, 0))
+
+        # Configure column weights
+        main_frame.columnconfigure(0, weight=2)  # Left panel gets more space
+        main_frame.columnconfigure(1, weight=1)  # Right panel for preview
+        main_frame.rowconfigure(0, weight=1)
+
+        # Left panel configuration
+        left_frame.columnconfigure(0, weight=1)
+        left_frame.rowconfigure(0, weight=1)  # Files list gets weight
+
+        # Right panel configuration
+        right_frame.columnconfigure(0, weight=1)
+        right_frame.rowconfigure(0, weight=1)
+
+        # === LEFT PANEL ===
+        left_content = ttk.Frame(left_frame)
+        left_content.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        left_content.columnconfigure(0, weight=1)
+        left_content.rowconfigure(0, weight=1)  # Files list area
+
         # Input files selection
-        input_frame = ttk.LabelFrame(main_frame, text="Input Images", padding="5")
-        input_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        input_frame = ttk.LabelFrame(left_content, text="Input Images", padding="5")
+        input_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
         input_frame.columnconfigure(0, weight=1)
+        input_frame.rowconfigure(1, weight=1)
 
         # File selection buttons
         buttons_frame = ttk.Frame(input_frame)
@@ -74,9 +101,8 @@ class ImageProcessor:
         list_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(5, 0))
         list_frame.columnconfigure(0, weight=1)
         list_frame.rowconfigure(0, weight=1)
-        input_frame.rowconfigure(1, weight=1)
 
-        self.files_listbox = tk.Listbox(list_frame, height=6)
+        self.files_listbox = tk.Listbox(list_frame, height=8)
         self.files_listbox.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.files_listbox.yview)
@@ -84,8 +110,8 @@ class ImageProcessor:
         self.files_listbox.configure(yscrollcommand=scrollbar.set)
 
         # Processing mode
-        mode_frame = ttk.LabelFrame(main_frame, text="Processing Mode", padding="5")
-        mode_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        mode_frame = ttk.LabelFrame(left_content, text="Processing Mode", padding="5")
+        mode_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
 
         ttk.Radiobutton(mode_frame, text="Resize and convert to WebP",
                         variable=self.convert_only, value=False,
@@ -95,8 +121,8 @@ class ImageProcessor:
                         command=self.toggle_resize_options).grid(row=1, column=0, sticky=tk.W)
 
         # Processing parameters
-        self.params_frame = ttk.LabelFrame(main_frame, text="Processing Parameters", padding="5")
-        self.params_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        self.params_frame = ttk.LabelFrame(left_content, text="Processing Parameters", padding="5")
+        self.params_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
 
         # Dimensions
         self.size_frame = ttk.Frame(self.params_frame)
@@ -120,7 +146,7 @@ class ImageProcessor:
 
         self.crop_enabled_cb = ttk.Checkbutton(self.options_frame, text="Center crop",
                                                variable=self.crop_enabled)
-        self.crop_enabled_cb.grid(row=0, column=1, sticky=tk.W, padx=(20, 0))
+        self.crop_enabled_cb.grid(row=1, column=0, sticky=tk.W, pady=(5, 0))
 
         # WebP quality
         quality_frame = ttk.Frame(self.params_frame)
@@ -128,7 +154,7 @@ class ImageProcessor:
 
         ttk.Label(quality_frame, text="WebP Quality:").grid(row=0, column=0, sticky=tk.W)
         ttk.Scale(quality_frame, from_=1, to=100, orient=tk.HORIZONTAL,
-                  variable=self.quality, length=200).grid(row=0, column=1, padx=(5, 5))
+                  variable=self.quality, length=150).grid(row=0, column=1, padx=(5, 5))
         ttk.Label(quality_frame, textvariable=self.quality).grid(row=0, column=2)
 
         # File naming settings
@@ -140,16 +166,16 @@ class ImageProcessor:
         ttk.Entry(naming_frame, textvariable=self.suffix, width=15).grid(row=0, column=1, padx=(5, 0))
 
         # Output folder
-        output_frame = ttk.LabelFrame(main_frame, text="Output Folder", padding="5")
-        output_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        output_frame = ttk.LabelFrame(left_content, text="Output Folder", padding="5")
+        output_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         output_frame.columnconfigure(0, weight=1)
 
         ttk.Entry(output_frame, textvariable=self.output_path).grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 5))
         ttk.Button(output_frame, text="Select Folder", command=self.select_output_folder).grid(row=0, column=1)
 
         # Processing progress
-        progress_frame = ttk.LabelFrame(main_frame, text="Processing Progress", padding="5")
-        progress_frame.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        progress_frame = ttk.LabelFrame(left_content, text="Processing Progress", padding="5")
+        progress_frame.grid(row=4, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         progress_frame.columnconfigure(0, weight=1)
 
         self.progress_bar = ttk.Progressbar(progress_frame, variable=self.progress_var,
@@ -159,8 +185,8 @@ class ImageProcessor:
         ttk.Label(progress_frame, textvariable=self.current_file_var).grid(row=1, column=0, sticky=tk.W)
 
         # Control buttons
-        button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=5, column=0, columnspan=2, pady=(0, 10))
+        button_frame = ttk.Frame(left_content)
+        button_frame.grid(row=5, column=0, pady=(0, 10))
 
         self.process_button = ttk.Button(button_frame, text="Process All",
                                          command=self.process_images)
@@ -171,18 +197,38 @@ class ImageProcessor:
         self.stop_button = ttk.Button(button_frame, text="Stop", command=self.stop_processing, state=tk.DISABLED)
         self.stop_button.pack(side=tk.LEFT)
 
-        # Preview area
-        preview_frame = ttk.LabelFrame(main_frame, text="Preview", padding="5")
-        preview_frame.grid(row=6, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
-        main_frame.rowconfigure(6, weight=1)
-
-        self.preview_label = ttk.Label(preview_frame, text="Select images to preview")
-        self.preview_label.pack(expand=True)
-
         # Status bar
         self.status_var = tk.StringVar(value="Ready")
-        status_bar = ttk.Label(main_frame, textvariable=self.status_var, relief=tk.SUNKEN)
-        status_bar.grid(row=7, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(10, 0))
+        status_bar = ttk.Label(left_content, textvariable=self.status_var, relief=tk.SUNKEN)
+        status_bar.grid(row=6, column=0, sticky=(tk.W, tk.E), pady=(10, 0))
+
+        # === RIGHT PANEL - PREVIEW ===
+        preview_frame = ttk.LabelFrame(right_frame, text="Preview", padding="5")
+        preview_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        preview_frame.columnconfigure(0, weight=1)
+        preview_frame.rowconfigure(0, weight=1)
+
+        # Preview canvas with scrollbars
+        preview_canvas_frame = ttk.Frame(preview_frame)
+        preview_canvas_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        preview_canvas_frame.columnconfigure(0, weight=1)
+        preview_canvas_frame.rowconfigure(0, weight=1)
+
+        self.preview_canvas = tk.Canvas(preview_canvas_frame, bg='white', highlightthickness=0)
+        self.preview_canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+        # Scrollbars for preview
+        preview_v_scroll = ttk.Scrollbar(preview_canvas_frame, orient=tk.VERTICAL, command=self.preview_canvas.yview)
+        preview_v_scroll.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        self.preview_canvas.configure(yscrollcommand=preview_v_scroll.set)
+
+        preview_h_scroll = ttk.Scrollbar(preview_canvas_frame, orient=tk.HORIZONTAL, command=self.preview_canvas.xview)
+        preview_h_scroll.grid(row=1, column=0, sticky=(tk.W, tk.E))
+        self.preview_canvas.configure(xscrollcommand=preview_h_scroll.set)
+
+        # Initial preview message
+        self.preview_canvas.create_text(150, 150, text="Select images and click Preview\nto see the result",
+                                        font=("Arial", 12), fill="gray", justify=tk.CENTER)
 
     def toggle_resize_options(self):
         """Enable/disable resize options based on processing mode."""
@@ -308,25 +354,55 @@ class ImageProcessor:
                         self.maintain_aspect.get(), self.crop_enabled.get()
                     )
 
-                # Scale for preview (max 400x300)
-                preview_size = (400, 300)
-                preview_img = processed.copy()
-                preview_img.thumbnail(preview_size, Image.Resampling.LANCZOS)
+                # Clear canvas
+                self.preview_canvas.delete("all")
+
+                # Scale for preview to fit canvas while maintaining aspect ratio
+                canvas_width = self.preview_canvas.winfo_width()
+                canvas_height = self.preview_canvas.winfo_height()
+
+                if canvas_width <= 1 or canvas_height <= 1:
+                    # Canvas not ready yet, use default size
+                    canvas_width = 350
+                    canvas_height = 400
+
+                # Calculate preview size maintaining aspect ratio
+                img_width, img_height = processed.size
+                scale_x = (canvas_width - 20) / img_width
+                scale_y = (canvas_height - 40) / img_height
+                scale = min(scale_x, scale_y, 1.0)  # Don't scale up
+
+                preview_width = int(img_width * scale)
+                preview_height = int(img_height * scale)
+
+                preview_img = processed.resize((preview_width, preview_height), Image.Resampling.LANCZOS)
 
                 # Convert for tkinter
                 photo = ImageTk.PhotoImage(preview_img)
 
-                # Update preview
-                self.preview_label.configure(image=photo, text="")
-                self.preview_label.image = photo  # Keep reference
+                # Center image on canvas
+                x = (canvas_width - preview_width) // 2
+                y = 20
 
+                # Place image on canvas
+                self.preview_canvas.create_image(x, y, anchor=tk.NW, image=photo)
+                self.preview_canvas.image = photo  # Keep reference
+
+                # Add info text
                 filename = os.path.basename(self.input_files[file_index])
+                info_text = f"{filename}\nOriginal: {img.size[0]}x{img.size[1]}\nProcessed: {processed.size[0]}x{processed.size[1]}"
                 if self.convert_only.get():
-                    status_text = f"Preview: {filename} - {processed.size[0]}x{processed.size[1]} (conversion only)"
+                    info_text += "\n(Conversion only)"
                 else:
-                    status_text = f"Preview: {filename} - {processed.size[0]}x{processed.size[1]} (with resize)"
+                    info_text += f"\n(Resized to {processed.size[0]}x{processed.size[1]})"
 
-                self.status_var.set(status_text)
+                self.preview_canvas.create_text(x + preview_width // 2, y + preview_height + 10,
+                                                text=info_text, font=("Arial", 9), justify=tk.CENTER)
+
+                # Update scroll region
+                self.preview_canvas.configure(scrollregion=self.preview_canvas.bbox("all"))
+
+                self.status_var.set(f"Preview: {filename} - {processed.size[0]}x{processed.size[1]}")
 
         except Exception as e:
             messagebox.showerror("Error", f"Preview error: {str(e)}")
