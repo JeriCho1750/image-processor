@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "image-processor"
+version = "1.0.0"
+description = "GUI приложение для изменения размера и конвертации изображений в WebP"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "image_processor"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Pillow = "^10.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+black = "^23.0"
+flake8 = "^6.0"
+
+[tool.poetry.scripts]
+image-processor = "image_processor.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
